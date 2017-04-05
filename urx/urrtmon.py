@@ -49,6 +49,7 @@ class URRTMonitor(Thread):
     def __init__(self, urHost):
         Thread.__init__(self)
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.setLevel(logging.WARNING)
         self.daemon = True
         self._stop_event = True
         self._dataEvent = Condition()

@@ -65,6 +65,7 @@ class ParserUtils(object):
 
     def __init__(self):
         self.logger = logging.getLogger("ursecmon")
+        self.logger.setLevel(logging.WARNING)
         self.version = (0, 0)
 
     def parse(self, data):
@@ -250,6 +251,7 @@ class SecondaryMonitor(Thread):
     def __init__(self, host):
         Thread.__init__(self)
         self.logger = logging.getLogger("ursecmon")
+        self.logger.setLevel(logging.WARNING)
         self.daemon = True
         self._parser = ParserUtils()
         self._dict = {}
