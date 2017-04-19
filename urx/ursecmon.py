@@ -349,7 +349,8 @@ class SecondaryMonitor(Thread):
                 return ans[0]
             else:
                 # self.logger.debug("Could not find packet in received data")
-                tmp = self._s_secondary.recv(1024)
+                size = 1024 if URX_THREADS else 1024 * 100
+                tmp = self._s_secondary.recv(size)
                 self._dataqueue += tmp
                 if not URX_THREADS:
                     return

@@ -125,6 +125,8 @@ class Robot(URRobot):
         get current transform from base to to tcp
         """
         pose = URRobot.getl(self, wait, _log)
+        if pose is None:
+            return m3d.Transform()
         trans = self.csys.inverse * m3d.Transform(pose)
         if _log:
             self.logger.debug("Returning pose to user: %s", trans.pose_vector)

@@ -146,7 +146,7 @@ class URRTMonitor(Thread):
                 return tcf_force
     getTCFForce = tcf_force
 
-    def __recv_rt_data(self):
+    def _recv_rt_data(self):
         head = self.__recv_bytes(4)
         # Record the timestamp for this logical package
         timestamp = self.__recvTime
@@ -264,5 +264,5 @@ class URRTMonitor(Thread):
         self._stop_event = False
         self._rtSock.connect((self._urHost, 30003))
         while not self._stop_event:
-            self.__recv_rt_data()
+            self._recv_rt_data()
         self._rtSock.close()
