@@ -10,8 +10,8 @@ http://support.universal-robots.com/Technical/PrimaryAndSecondaryClientInterface
 """
 
 
-from threading import Thread, Condition, Lock
 import logging
+import os
 import struct
 import socket
 from copy import copy
@@ -21,6 +21,22 @@ __author__ = "Olivier Roulet-Dubonnet"
 __copyright__ = "Copyright 2011-2013, Sintef Raufoss Manufacturing"
 __credits__ = ["Olivier Roulet-Dubonnet"]
 __license__ = "LGPLv3"
+
+URX_THREADS = os.getenv('URX_THREADS', 1) == '1'
+if URX_THREADS:
+    from threading import Thread, Condition, Lock
+else:
+    class Thread(object):
+        def start(self): pass
+    class Condition(object):
+        def __enter__(self): pass
+        def __exit__(self, *args): pass
+        def notify_all(self): pass
+        def notifyAll(self): self.notify_all()
+        def wait(self, timeout=None): None if timeout is None else time.sleep(timeout)
+    class Lock(object):
+        def __enter__(self): pass
+        def __exit__(self, *args): pass
 
 
 class ParsingException(Exception):
@@ -285,6 +301,8 @@ class SecondaryMonitor(Thread):
                         data.condition.notify_all()
 
             data = self._get_data()
+            if not URX_THREADS and data is None:
+                return
             try:
                 tmpdict = self._parser.parse(data)
                 with self._dictLock:
@@ -333,6 +351,8 @@ class SecondaryMonitor(Thread):
                 # self.logger.debug("Could not find packet in received data")
                 tmp = self._s_secondary.recv(1024)
                 self._dataqueue += tmp
+                if not URX_THREADS:
+                    return
 
     def wait(self, timeout=0.5):
         """
@@ -341,7 +361,7 @@ class SecondaryMonitor(Thread):
         tstamp = self.lastpacket_timestamp
         with self._dataEvent:
             self._dataEvent.wait(timeout)
-            if tstamp == self.lastpacket_timestamp:
+            if URX_THREADS and tstamp == self.lastpacket_timestamp:
                 raise TimeoutException("Did not receive a valid data packet from robot in {}".format(timeout))
 
     def get_cartesian_info(self, wait=False):
